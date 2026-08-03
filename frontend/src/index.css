@@ -1,0 +1,191 @@
+@import 'tailwindcss';
+
+/*
+ * ModEd.ai design tokens.
+ *
+ * Palette is grounded in the schoolroom/gradebook, not a generic SaaS
+ * dashboard: warm paper + chalkboard green + chalk gold, with pencil-graphite
+ * neutrals. Gold and green carry meaning (mastery, achievement); coral is
+ * reserved strictly for errors/destructive actions. See docs/DESIGN.md.
+ */
+:root,
+[data-theme='light'] {
+  --paper: #f7f5ef;
+  --paper-raised: #ffffff;
+  --paper-sunken: #efebe0;
+  --ink: #1b2420;
+  --ink-muted: #6b6459;
+  --ink-faint: #a39c8d;
+  /* Green/gold/coral trio validated with the dataviz skill's CVD checker
+     (scripts/validate_palette.js) - all three checks pass at these exact
+     values; do not retune without re-running it. */
+  --board: #1c7a55;
+  --board-strong: #145c40;
+  --board-soft: #e4ede9;
+  --gold: #b8842a;
+  --gold-strong: #96691c;
+  --gold-soft: #f6e9d0;
+  --correct: #1c7a55;
+  --correct-soft: #e2f0e8;
+  --flag: #b6432c;
+  --flag-soft: #f6e3de;
+  --border: #e4dfd3;
+  --border-strong: #cfc8b8;
+  --shadow-color: 30 20% 20%;
+}
+
+[data-theme='dark'] {
+  --paper: #12201a;
+  --paper-raised: #192a22;
+  --paper-sunken: #0c1712;
+  --ink: #f3efe4;
+  --ink-muted: #a9b3a7;
+  --ink-faint: #6c7c74;
+  /* Same CVD-validated trio, re-picked within the darker lightness band. */
+  --board: #3fa37e;
+  --board-strong: #6bc6a3;
+  --board-soft: #1e3a30;
+  --gold: #b5872e;
+  --gold-strong: #d1a13f;
+  --gold-soft: #3a2f18;
+  --correct: #3fa37e;
+  --correct-soft: #1c3327;
+  --flag: #d9704f;
+  --flag-soft: #3a231d;
+  --border: #24352c;
+  --border-strong: #34493d;
+  --shadow-color: 150 30% 3%;
+}
+
+@theme {
+  --font-display: 'Fraunces', ui-serif, Georgia, serif;
+  --font-sans: 'Manrope', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+
+  --color-paper: var(--paper);
+  --color-paper-raised: var(--paper-raised);
+  --color-paper-sunken: var(--paper-sunken);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+  --color-board: var(--board);
+  --color-board-strong: var(--board-strong);
+  --color-board-soft: var(--board-soft);
+  --color-gold: var(--gold);
+  --color-gold-strong: var(--gold-strong);
+  --color-gold-soft: var(--gold-soft);
+  --color-correct: var(--correct);
+  --color-correct-soft: var(--correct-soft);
+  --color-flag: var(--flag);
+  --color-flag-soft: var(--flag-soft);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  --radius-sm: 0.4rem;
+  --radius-md: 0.65rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+
+  --shadow-xs: 0 1px 2px hsl(var(--shadow-color) / 0.06);
+  --shadow-sm: 0 2px 6px hsl(var(--shadow-color) / 0.08);
+  --shadow-md: 0 8px 24px hsl(var(--shadow-color) / 0.1);
+  --shadow-lg: 0 16px 48px hsl(var(--shadow-color) / 0.14);
+
+  --animate-fade-in: fade-in 0.2s ease-out;
+  --animate-slide-up: slide-up 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-scale-in: scale-in 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes scale-in {
+    from {
+      opacity: 0;
+      transform: scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    color-scheme: light dark;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: var(--color-gold-soft);
+    color: var(--color-ink);
+  }
+
+  /* Visible, deliberate focus states everywhere - never suppressed. */
+  :focus-visible {
+    outline: 2px solid var(--color-board);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+  }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border-strong) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: var(--color-border-strong);
+    border-radius: 999px;
+  }
+}

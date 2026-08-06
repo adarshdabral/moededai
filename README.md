@@ -43,7 +43,7 @@ Read in this order before contributing:
 | Logging | Morgan + Winston |
 | Testing | Jest + Supertest |
 | File Upload | Multer |
-| AI Provider | Google Gemini API |
+| AI Provider | Groq API |
 | Architecture | Service-Repository pattern |
 | Containerization | Docker + Docker Compose |
 
@@ -51,13 +51,13 @@ Read in this order before contributing:
 
 - Node.js 20 or later
 - Docker & Docker Compose (recommended, for a consistent local MongoDB + API environment)
-- A Google Gemini API key (only required once AI-dependent phases begin)
+- A Groq API key (only required once AI-dependent phases begin)
 
 ## Getting Started (Backend)
 
 ```bash
 cd backend
-cp .env.example .env      # fill in real values, especially JWT secrets and GEMINI_API_KEY
+cp .env.example .env      # fill in real values, especially JWT secrets and GROQ_API_KEY
 npm install
 ```
 

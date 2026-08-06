@@ -124,11 +124,11 @@ in integration tests (11 passing).
 
 ## Phase 4 — AI Tutor
 
-Goal: the first AI-integrated feature; establishes the Gemini client pattern every later AI
+Goal: the first AI-integrated feature; establishes the Groq client pattern every later AI
 feature reuses.
 
-- [x] `src/ai/gemini.client.ts` — Gemini SDK wrapper (20s timeout via `Promise.race`, every
-      failure translated to `AIProviderError`; throws immediately if `GEMINI_API_KEY` unset)
+- [x] `src/ai/groq.client.ts` — Groq SDK wrapper (20s timeout via `Promise.race`, every
+      failure translated to `AIProviderError`; throws immediately if `GROQ_API_KEY` unset)
 - [x] `src/ai/prompts/tutor.prompts.ts`
 - [x] `ai_tutor_conversations` collection/model (§10), including message-cap/archiving behavior
       (cap: 50 messages/document; beyond that a new conversation document is created and used
@@ -137,9 +137,9 @@ feature reuses.
       `GET /ai-tutor/conversations` (history list), `GET /ai-tutor/conversations/:id`
 - [x] Topic-context injection (optional `topicId` shapes the system prompt via
       `buildTutorSystemInstruction`)
-- [x] Gemini client is mocked in the default test suite (`jest.spyOn(aiClient, ...)` against the
+- [x] Groq client is mocked in the default test suite (`jest.spyOn(aiClient, ...)` against the
       `AIClient` interface — no real API calls in CI); no live-API test subset exists yet since
-      no `GEMINI_API_KEY` is available in this environment
+      no `GROQ_API_KEY` is available in CI
 - [x] Swagger docs
 - [x] **Scope decision:** all AI Tutor routes restricted to `role: student` (matches the feature
       spec's "AI Learning Assistant" framing as student-facing); teachers/admins do not get tutor

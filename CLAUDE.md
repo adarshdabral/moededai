@@ -32,8 +32,8 @@ still be running in production two years from now, maintained by engineers who a
 - Production quality from the first commit. There is no "MVP throwaway" tier of code.
 - The backend is being built standalone. The frontend does not exist yet — do not let its
   absence justify cutting corners (e.g. do not skip validation because "no UI calls this yet").
-- AI features (tutor, test generation, scoring) are provider-integrated via Google Gemini, but
-  the AI provider must always sit behind an internal abstraction — never call the Gemini SDK
+- AI features (tutor, test generation, scoring) are provider-integrated via Groq, but
+  the AI provider must always sit behind an internal abstraction — never call the Groq SDK
   directly from a controller or service that isn't the dedicated AI module.
 
 ---
@@ -86,9 +86,9 @@ Full detail lives in `docs/ARCHITECTURE.md`. The binding rules are:
 - Shared, reusable code (middleware, error classes, response helpers, base repository, constants)
   lives in `src/common/`, and only there. If it's used by more than one module, it belongs in
   `common/`, not copy-pasted.
-- The AI provider (Gemini) is wrapped by a single client in `src/ai/`. Feature modules
+- The AI provider (Groq) is wrapped by a single client in `src/ai/`. Feature modules
   (`ai-tutor`, `ai-test`, `knowledge-score`) depend on that client's interface, never on the
-  `@google/generative-ai` package directly. This keeps a future provider swap to one file.
+  `groq-sdk` package directly. This keeps a future provider swap to one file.
 - No feature module may register its own Express app, its own DB connection, or its own logger
   instance. Those are singletons created once in `config/` and imported everywhere.
 
@@ -226,7 +226,7 @@ Booleans read as predicates: `isActive`, `hasSubmitted`, `canResolveDoubt` — n
 - Async code paths (including AI provider calls) must never produce an unhandled promise
   rejection — every awaited call that can fail is inside a function ultimately wrapped by
   `asyncHandler` or an explicit `try/catch` that rethrows as `AppError`.
-- External calls (Gemini API, future third-party integrations) are wrapped with timeouts and
+- External calls (Groq API, future third-party integrations) are wrapped with timeouts and
   translated into a domain-specific `AppError` (e.g. `AIProviderError`) — callers never see raw
   SDK exceptions.
 
@@ -304,7 +304,7 @@ Booleans read as predicates: `isActive`, `hasSubmitted`, `canResolveDoubt` — n
 - Repositories are tested against a real (test/in-memory) MongoDB instance, not mocked — mocking
   the database hides schema and query bugs.
 - AI provider calls are mocked in tests by default via the internal AI client interface (see
-  §3); a small, explicitly-marked set of tests may hit the real Gemini API and are excluded from
+  §3); a small, explicitly-marked set of tests may hit the real Groq API and are excluded from
   the default CI run.
 - No PR merges with failing tests or reduced coverage on the files it touches.
 - Tests must be deterministic — no reliance on wall-clock time, random values, or external
@@ -355,7 +355,7 @@ Full detail in `docs/ROADMAP.md`. Summary:
    password reset, email verification.
 3. **Course Management** — courses, topics, resources, assignments, learning paths (admin/teacher
    authored content, CRUD).
-4. **AI Tutor** — Gemini-backed chatbot, conversation history, topic explanations.
+4. **AI Tutor** — Groq-backed chatbot, conversation history, topic explanations.
 5. **AI Test Generation & Knowledge Score** — AI-generated quizzes, scoring engine, weak-topic
    identification.
 6. **Monthly Assessments & Growth Analytics** — adaptive scheduling, comparative reports,
@@ -423,7 +423,7 @@ the docs are already available for full detail.
 
 - Never write placeholder, mock, or "fake it for now" implementations and call them done.
 - Never put business logic in a controller, route file, or Mongoose middleware hook.
-- Never call the Gemini SDK directly outside `src/ai/`.
+- Never call the Groq SDK directly outside `src/ai/`.
 - Never let one module import another module's repository or Mongoose model directly.
 - Never store or log plaintext passwords, tokens, or secrets.
 - Never store a direct, queryable link between an anonymous doubt/activity record and the real

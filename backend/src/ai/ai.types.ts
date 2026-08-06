@@ -11,7 +11,7 @@ export interface GenerateChatReplyOptions {
 
 /**
  * Provider-agnostic contract every AI-dependent module depends on. Never
- * import `@google/generative-ai` (or any future provider SDK) outside
+ * import `groq-sdk` (or any future provider SDK) outside
  * src/ai/ - see docs/ARCHITECTURE.md §7 and CLAUDE.md §3/§19.
  */
 export interface AIClient {

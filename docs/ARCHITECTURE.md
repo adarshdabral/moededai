@@ -11,7 +11,7 @@ the enforceable rules derived from it. This document explains the *why* and the 
 ModEd.ai's backend is a modular monolith: a single Express/Node.js/TypeScript service, organized
 into feature modules that each own a full vertical slice (route → controller → service →
 repository → model), talking to a single MongoDB database, with AI capabilities (tutoring, test
-generation, scoring) delegated to Google Gemini through one internal abstraction layer.
+generation, scoring) delegated to Groq through one internal abstraction layer.
 
 ```
                               ┌───────────────────────────┐
@@ -53,11 +53,11 @@ generation, scoring) delegated to Google Gemini through one internal abstraction
                                      ▼              ▼
                        ┌───────────────────┐  ┌──────────────────┐
                        │    Repository      │  │   AI Client       │
-                       │ (Mongoose queries) │  │ (Gemini wrapper)  │
+                       │ (Mongoose queries) │  │  (Groq wrapper)   │
                        └─────────┬─────────┘  └────────┬─────────┘
                                  ▼                      ▼
                        ┌───────────────────┐  ┌──────────────────┐
-                       │      MongoDB        │  │  Google Gemini    │
+                       │      MongoDB        │  │       Groq        │
                        └───────────────────┘  └──────────────────┘
 ```
 
@@ -76,11 +76,11 @@ and a centralized error handler, not per-route boilerplate.
 | **Service** | Business logic, orchestration, rule enforcement | Repository (same module), other modules' **services**, AI client | Express `req`/`res`, Mongoose models directly |
 | **Repository** | Data access — the only layer building Mongoose queries | Mongoose model (same module) | Business logic, other modules' models |
 | **Model** | Mongoose schema/model definition + persistence-level validation | Mongoose | Business rules beyond data integrity |
-| **AI Client** (`src/ai/`) | Wraps Gemini SDK; prompt templating; response parsing | `@google/generative-ai` | Being imported by anything outside feature services |
+| **AI Client** (`src/ai/`) | Wraps Groq SDK; prompt templating; response parsing | `groq-sdk` | Being imported by anything outside feature services |
 
 This is a strict layered architecture: each layer only talks to the layer directly below it (or
 across to another module's service, never lower). This makes every layer independently testable
-and swappable — e.g., the AI client can be mocked in tests, or Gemini swapped for another
+and swappable — e.g., the AI client can be mocked in tests, or Groq swapped for another
 provider, without touching services.
 
 ---
@@ -141,7 +141,7 @@ backend/
 │   │   ├── constants/          # roles, shared message strings
 │   │   └── interfaces/         # shared contracts (e.g. base repository interface)
 │   ├── database/              # Mongo connection bootstrap, base repository class
-│   ├── ai/                     # Gemini client wrapper, prompt templates, AI-domain types
+│   ├── ai/                     # Groq client wrapper, prompt templates, AI-domain types
 │   └── jobs/                   # Scheduled/background tasks (e.g. monthly assessment trigger)
 ├── tests/
 │   ├── unit/                   # Service/repository logic, dependencies mocked
@@ -198,16 +198,16 @@ modules/ai-tutor/      modules/ai-test/      modules/knowledge-score/
         │                     │                        │
         └─────────────────────┼────────────────────────┘
                               ▼
-                    src/ai/gemini.client.ts   ← single Gemini SDK integration point
+                    src/ai/groq.client.ts     ← single Groq SDK integration point
                               │
                     src/ai/prompts/*.ts       ← prompt templates per use case
                               │
-                       @google/generative-ai
+                           groq-sdk
                               │
-                        Google Gemini API
+                          Groq API
 ```
 
-- **One client, many prompt templates.** `src/ai/gemini.client.ts` exposes a small interface
+- **One client, many prompt templates.** `src/ai/groq.client.ts` exposes a small interface
   (e.g. `generateText`, `generateStructuredJSON`) that every AI-dependent module calls. Prompt
   construction for a specific feature (tutor conversation, quiz generation, scoring rationale)
   lives in `src/ai/prompts/`, keeping prompt engineering out of business-logic services.
@@ -215,10 +215,10 @@ modules/ai-tutor/      modules/ai-test/      modules/knowledge-score/
   JSON), the client requests and validates structured output, and the calling service validates
   the parsed result against a Zod schema before persisting it — AI output is treated as
   untrusted input, exactly like a request body.
-- **Timeouts & fallbacks.** Every Gemini call has an explicit timeout. Failures are translated
+- **Timeouts & fallbacks.** Every Groq call has an explicit timeout. Failures are translated
   into a domain `AIProviderError` (see `CLAUDE.md` §8) — callers get a typed error, never a raw
   SDK exception or an unhandled rejection.
-- **No client-side API key exposure.** All Gemini calls are server-side only; the API key lives
+- **No client-side API key exposure.** All Groq calls are server-side only; the API key lives
   only in backend environment configuration.
 - **Cost/rate awareness.** Since there is no cache/queue layer in this stack, AI-heavy modules
   (test generation) must apply their own request-level guards (e.g. one generation per topic per
@@ -369,7 +369,7 @@ strategy so it's a deliberate decision when a deployment target is chosen, not a
   the disk is — this is exactly the gap a cloud `StorageClient` implementation (S3, GCS) closes,
   since those providers have their own durability/versioning. Treat local disk storage as
   dev/single-instance-only for this reason, not just for scaling.
-- **Secrets** (`.env` values — JWT secrets, `GEMINI_API_KEY`, `MONGO_URI`) are never in the
+- **Secrets** (`.env` values — JWT secrets, `GROQ_API_KEY`, `MONGO_URI`) are never in the
   database and so are out of scope for a DB backup; they belong in whatever secret manager the
   deployment platform provides, with its own backup/rotation policy.
 - **Restore drill cadence:** quarterly — restoring a backup to a scratch environment and running

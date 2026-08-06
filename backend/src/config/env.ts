@@ -15,8 +15,8 @@ const envSchema = z.object({
   JWT_ACCESS_EXPIRY: z.string().default('15m'),
   JWT_REFRESH_EXPIRY: z.string().default('7d'),
 
-  GEMINI_API_KEY: z.string().optional(),
-  GEMINI_MODEL: z.string().default('gemini-1.5-pro'),
+  GROQ_API_KEY: z.string().optional(),
+  GROQ_MODEL: z.string().default('llama-3.3-70b-versatile'),
 
   CORS_ORIGIN: z.string().default('http://localhost:3000'),
 

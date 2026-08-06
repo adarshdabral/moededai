@@ -75,7 +75,7 @@ export class RateLimitedError extends AppError {
 }
 
 /**
- * Thrown by src/ai/gemini.client.ts to translate any Gemini SDK failure
+ * Thrown by src/ai/groq.client.ts to translate any Groq SDK failure
  * (timeout, quota, malformed response) into a typed, safe-to-catch error.
  * Callers outside src/ai/ must never see a raw SDK exception.
  */

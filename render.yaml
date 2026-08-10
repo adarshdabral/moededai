@@ -1,0 +1,70 @@
+services:
+  # --- Backend API (Docker, built from backend/Dockerfile) ---
+  - type: web
+    name: moded-ai-backend
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /api/v1/health/live
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: API_PREFIX
+        value: /api/v1
+      # Set this in the Render dashboard after import — your real MongoDB Atlas URI.
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: JWT_ACCESS_EXPIRY
+        value: 15m
+      - key: JWT_REFRESH_EXPIRY
+        value: 7d
+      # Set this in the Render dashboard after import.
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_MODEL
+        value: llama-3.3-70b-versatile
+      # Update to the deployed frontend URL after the first deploy (see README note).
+      - key: CORS_ORIGIN
+        value: https://moded-ai-frontend.onrender.com
+      - key: RATE_LIMIT_WINDOW_MS
+        value: "900000"
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: "100"
+      - key: MAX_FILE_SIZE_MB
+        value: "5"
+      - key: UPLOAD_DIR
+        value: uploads
+      - key: LOG_LEVEL
+        value: info
+      - key: EMAIL_PROVIDER
+        value: console
+      # Optional: set both to bootstrap the first admin via `npm run seed` (run manually
+      # from a Render shell once — this is not run automatically on boot).
+      - key: ADMIN_SEED_EMAIL
+        sync: false
+      - key: ADMIN_SEED_PASSWORD
+        sync: false
+      - key: ADMIN_SEED_NAME
+        value: Platform Admin
+
+  # --- Frontend (static Vite build) ---
+  - type: web
+    name: moded-ai-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      # Update to the deployed backend URL after the first deploy (see README note).
+      - key: VITE_API_BASE_URL
+        value: https://moded-ai-backend.onrender.com/api/v1
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

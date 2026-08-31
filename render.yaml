@@ -1,5 +1,9 @@
 services:
   # --- Backend API (Docker, built from backend/Dockerfile) ---
+  # Note: the live service was provisioned as "moededai-2" (https://moededai-2.onrender.com),
+  # not the "moded-ai-backend" name below - this blueprint predates that deploy and was never
+  # re-synced. Renaming the key here will not rename the live service; it's left as documentation
+  # of the blueprint's origin.
   - type: web
     name: moded-ai-backend
     runtime: docker
@@ -29,9 +33,11 @@ services:
         sync: false
       - key: GROQ_MODEL
         value: llama-3.3-70b-versatile
-      # Update to the deployed frontend URL after the first deploy (see README note).
+      # The deployed frontend is on Vercel, not Render (see the note at the bottom of this
+      # file) - this must be set to that origin in the Render dashboard directly, since
+      # Render blueprint sync won't touch an existing service's env vars here.
       - key: CORS_ORIGIN
-        value: https://moded-ai-frontend.onrender.com
+        value: https://moededai.vercel.app
       - key: RATE_LIMIT_WINDOW_MS
         value: "900000"
       - key: RATE_LIMIT_MAX_REQUESTS
@@ -53,18 +59,7 @@ services:
       - key: ADMIN_SEED_NAME
         value: Platform Admin
 
-  # --- Frontend (static Vite build) ---
-  - type: web
-    name: moded-ai-frontend
-    runtime: static
-    rootDir: frontend
-    buildCommand: npm install && npm run build
-    staticPublishPath: dist
-    envVars:
-      # Update to the deployed backend URL after the first deploy (see README note).
-      - key: VITE_API_BASE_URL
-        value: https://moded-ai-backend.onrender.com/api/v1
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
+# The frontend is deployed on Vercel (https://moededai.vercel.app), not Render - the static-site
+# service block that used to live here was never actually used and has been removed. See
+# frontend/vercel.json for the SPA rewrite config, and set VITE_API_BASE_URL in the Vercel
+# project's environment variables (Settings -> Environment Variables), not here.

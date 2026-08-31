@@ -154,6 +154,13 @@ backend/
 A module never has partial layers — if it has a controller, it has a service and repository,
 even if the repository is thin, so the pattern stays predictable across the codebase.
 
+**Database connection resilience.** `config/database.ts` retries `MONGO_URI` with backoff
+(5 attempts, 3s apart). Outside production, if all retries against `MONGO_URI` are exhausted and
+`MONGO_URI_FALLBACK` is set to a different URI, it retries against the fallback (typically a
+local MongoDB instance) before giving up, logging which URI it ultimately connected to. This
+fallback never runs in production — a prod deployment must fail loudly on a bad `MONGO_URI`
+rather than silently writing to a local database.
+
 ---
 
 ## 5. Dependency Rules

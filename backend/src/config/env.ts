@@ -9,6 +9,7 @@ const envSchema = z.object({
   API_PREFIX: z.string().default('/api/v1'),
 
   MONGO_URI: z.string().min(1, 'MONGO_URI is required'),
+  MONGO_URI_FALLBACK: z.string().default('mongodb://127.0.0.1:27017/moded_dev'),
 
   JWT_ACCESS_SECRET: z.string().min(16, 'JWT_ACCESS_SECRET must be at least 16 characters'),
   JWT_REFRESH_SECRET: z.string().min(16, 'JWT_REFRESH_SECRET must be at least 16 characters'),
@@ -33,6 +34,13 @@ const envSchema = z.object({
   ADMIN_SEED_EMAIL: z.string().email().optional(),
   ADMIN_SEED_PASSWORD: z.string().min(8).optional(),
   ADMIN_SEED_NAME: z.string().optional(),
+
+  DEMO_TEACHER_EMAIL: z.string().email().default('teacher@moded.ai'),
+  DEMO_TEACHER_PASSWORD: z.string().min(8).default('DemoPass123!'),
+  DEMO_TEACHER_NAME: z.string().default('Dana Reyes'),
+  DEMO_STUDENT_EMAIL: z.string().email().default('student@moded.ai'),
+  DEMO_STUDENT_PASSWORD: z.string().min(8).default('DemoPass123!'),
+  DEMO_STUDENT_NAME: z.string().default('Sam Okafor'),
 });
 
 export type Env = z.infer<typeof envSchema>;

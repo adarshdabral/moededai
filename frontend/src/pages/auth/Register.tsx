@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { AuthLayout } from '@/components/layout/AuthLayout';
 import { Button } from '@/components/ui/Button';
-import { Input, Label, FieldError } from '@/components/ui/Input';
+import { Input, PasswordInput, Label, FieldError } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { useRegister } from '@/hooks/useAuth';
 import { getApiErrorMessage } from '@/api/client';
@@ -64,9 +64,8 @@ export function RegisterPage() {
         </div>
         <div>
           <Label htmlFor="password">Password</Label>
-          <Input
+          <PasswordInput
             id="password"
-            type="password"
             autoComplete="new-password"
             {...register('password')}
             error={errors.password?.message}

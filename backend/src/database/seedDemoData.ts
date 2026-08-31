@@ -12,6 +12,7 @@
  */
 import { connectDatabase, disconnectDatabase } from '@config/database';
 import { logger } from '@config/logger';
+import { env } from '@config/env';
 import { ROLES } from '@common/constants/roles';
 import { hashPassword } from '@common/utils/password';
 import { generateAnonymousId } from '@common/utils/anonymousId';
@@ -26,9 +27,18 @@ import { topicRepository } from '@modules/course/topic.repository';
 import { enrollmentService } from '@modules/course/enrollment.service';
 import type { UserDocument } from '@modules/user/user.model';
 
-const DEMO_PASSWORD = 'DemoPass123!';
-const DEMO_TEACHER = { name: 'Dana Reyes', email: 'teacher@moded.ai', subject: 'Mathematics' };
-const DEMO_STUDENT = { name: 'Sam Okafor', email: 'student@moded.ai', gradeLevel: 'Grade 9' };
+const DEMO_TEACHER = {
+  name: env.DEMO_TEACHER_NAME,
+  email: env.DEMO_TEACHER_EMAIL,
+  password: env.DEMO_TEACHER_PASSWORD,
+  subject: 'Mathematics',
+};
+const DEMO_STUDENT = {
+  name: env.DEMO_STUDENT_NAME,
+  email: env.DEMO_STUDENT_EMAIL,
+  password: env.DEMO_STUDENT_PASSWORD,
+  gradeLevel: 'Grade 9',
+};
 const DEMO_COURSE = { title: 'Algebra I', subject: 'Mathematics', gradeLevel: 'Grade 9' };
 const DEMO_TOPICS = [
   {
@@ -49,12 +59,13 @@ const DEMO_TOPICS = [
 async function getOrCreateUser(
   email: string,
   name: string,
+  password: string,
   role: (typeof ROLES)[keyof typeof ROLES]
 ): Promise<{ user: UserDocument; wasCreated: boolean }> {
   const existing = await userService.getByEmail(email);
   if (existing) return { user: existing, wasCreated: false };
 
-  const passwordHash = await hashPassword(DEMO_PASSWORD);
+  const passwordHash = await hashPassword(password);
   const anonymousId = generateAnonymousId();
   const user = await userService.createUser({ name, email, passwordHash, role, anonymousId });
   await userService.markEmailVerified(String(user._id));
@@ -66,6 +77,7 @@ async function seedDemoData(): Promise<void> {
   const { user: teacher, wasCreated: teacherCreated } = await getOrCreateUser(
     DEMO_TEACHER.email,
     DEMO_TEACHER.name,
+    DEMO_TEACHER.password,
     ROLES.TEACHER
   );
   if (teacherCreated) {
@@ -73,7 +85,7 @@ async function seedDemoData(): Promise<void> {
       userId: String(teacher._id),
       subjectSpecialization: [DEMO_TEACHER.subject],
     });
-    logger.info('Demo teacher created', { email: teacher.email, password: DEMO_PASSWORD });
+    logger.info('Demo teacher created', { email: teacher.email });
   } else {
     logger.info('Demo teacher already exists - skipped', { email: teacher.email });
   }
@@ -81,6 +93,7 @@ async function seedDemoData(): Promise<void> {
   const { user: student, wasCreated: studentCreated } = await getOrCreateUser(
     DEMO_STUDENT.email,
     DEMO_STUDENT.name,
+    DEMO_STUDENT.password,
     ROLES.STUDENT
   );
   if (studentCreated) {
@@ -88,7 +101,7 @@ async function seedDemoData(): Promise<void> {
       userId: String(student._id),
       gradeLevel: DEMO_STUDENT.gradeLevel,
     });
-    logger.info('Demo student created', { email: student.email, password: DEMO_PASSWORD });
+    logger.info('Demo student created', { email: student.email });
   } else {
     logger.info('Demo student already exists - skipped', { email: student.email });
   }
@@ -131,10 +144,9 @@ async function seedDemoData(): Promise<void> {
     });
   }
 
-  logger.info('Demo data seed complete', {
+  logger.info('Demo data seed complete - see DEMO_TEACHER_PASSWORD/DEMO_STUDENT_PASSWORD in .env for credentials', {
     teacherEmail: DEMO_TEACHER.email,
     studentEmail: DEMO_STUDENT.email,
-    password: DEMO_PASSWORD,
   });
 }
 

@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { AuthLayout } from '@/components/layout/AuthLayout';
 import { Button } from '@/components/ui/Button';
-import { Input, Label, FieldError } from '@/components/ui/Input';
+import { Input, PasswordInput, Label, FieldError } from '@/components/ui/Input';
 import { useResetPassword } from '@/hooks/useAuth';
 import { getApiErrorMessage } from '@/api/client';
 
@@ -41,9 +41,8 @@ export function ResetPasswordPage() {
       >
         <div>
           <Label htmlFor="newPassword">New password</Label>
-          <Input
+          <PasswordInput
             id="newPassword"
-            type="password"
             autoComplete="new-password"
             {...register('newPassword')}
             error={errors.newPassword?.message}

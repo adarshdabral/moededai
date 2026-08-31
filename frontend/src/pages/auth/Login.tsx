@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { AuthLayout } from '@/components/layout/AuthLayout';
 import { Button } from '@/components/ui/Button';
-import { Input, Label, FieldError } from '@/components/ui/Input';
+import { Input, PasswordInput, Label, FieldError } from '@/components/ui/Input';
 import { useLogin } from '@/hooks/useAuth';
 import { getApiErrorMessage } from '@/api/client';
 
@@ -40,9 +40,8 @@ export function LoginPage() {
               Forgot password?
             </Link>
           </div>
-          <Input
+          <PasswordInput
             id="password"
-            type="password"
             autoComplete="current-password"
             {...register('password')}
             error={errors.password?.message}

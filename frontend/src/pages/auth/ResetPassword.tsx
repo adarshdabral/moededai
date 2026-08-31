@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { AuthLayout } from '@/components/layout/AuthLayout';
 import { Button } from '@/components/ui/Button';
-import { Input, PasswordInput, Label, FieldError } from '@/components/ui/Input';
+import { PasswordInput, Label, FieldError } from '@/components/ui/Input';
 import { useResetPassword } from '@/hooks/useAuth';
 import { getApiErrorMessage } from '@/api/client';
 
